@@ -7,24 +7,28 @@ import { withBookstoreService } from '../hoc';
 import { booksLoaded } from '../../actions';
 import { compose } from '../../utils';
 import './book-list.css'
+import Spinner from '../spinner';
 
 class BookList extends Component {
 
 	componentDidMount() {
 		// 1. receive data
-		const { bookstoreService } = this.props;
-		const data = bookstoreService.getBooks();
-		console.log(data);
+		const { bookstoreService, booksLoaded } = this.props;
+		bookstoreService.getBooks()
+			.then((data) => booksLoaded(data) )
 
 		// 2. dispatch action to store
-		this.props.booksLoaded(data);
+		//! was changed
 	}
 
 	render() {
-		const { books } = this.props;
+		const { books, loading } = this.props;
+		if (loading) {
+			return <Spinner />
+		}
 
 		return (
-			<ul>
+			<ul className='book-list' >
 				{books.map((book) => {
 					return (
 						<li key={book.id}>
@@ -40,8 +44,8 @@ class BookList extends Component {
 
 //== Это функция определяет какие своиства получит компонент из Redux
 
-const mapStateToProps = ({ books }) => {
-	return { books };
+const mapStateToProps = ({ books, loading }) => {
+	return { books, loading };
 };
 
 
