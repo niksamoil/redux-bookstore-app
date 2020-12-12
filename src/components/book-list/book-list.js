@@ -14,14 +14,8 @@ class BookList extends Component {
 
 	componentDidMount() {
 		// 1. receive data
-		const { bookstoreService, booksLoaded, booksRequested, booksError } = this.props;
-		booksRequested();
-		bookstoreService.getBooks()
-			.then((data) => booksLoaded(data) )
-			.catch((err) => booksError(err));
+		this.props.fetchBooks();
 
-		// 2. dispatch action to store
-		//! was changed
 	}
 
 	render() {
@@ -56,33 +50,22 @@ const mapStateToProps = ({ books, loading, error }) => {
 
 
 // == Это фунцкия показывает какие именно действия хочет выполнить наш компонент
-// const mapDispatchToProps = (dispatch) => {
-	
- 	// =! method with bindActionsCreators
-// 	return bindActionCreators({
-// 		booksLoaded
-// 	}, dispatch );
-
-// 	//! old method
-// 	return {
-// 		booksLoaded: (newBooks) => {
-// 			dispatch(booksLoaded(newBooks));
-// 		}
-// 	}
-	
-// }
-
-//* alternative method which send automat an object instead function
-const mapDispatchToProps = {
-	booksLoaded, //* >> this object equal with bindActionsCreators above
-	booksRequested,
-	booksError
-};
 
 
-// export default withBookstoreService()(
-// 	connect(mapStateToProps, mapDispatchToProps)(BookList)
-// );
+const mapDispatchToProps = (dispatch, ownProps) => {
+	const { bookstoreService } = ownProps;
+	return {
+		fetchBooks: () => {
+			console.log('feetching books');
+			dispatch(booksRequested());
+			bookstoreService.getBooks()
+				.then((data) => dispatch(booksLoaded(data)) )
+				.catch((err) => dispatch(booksError(err)));
+		}
+	}
+}
+
+
 
 //* After add compose from folder utils we can rewrite our export
 export default compose(
