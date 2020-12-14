@@ -1,4 +1,5 @@
 import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
 
 import reducer from './reducers';
 
@@ -9,7 +10,7 @@ const logMiddleware = ({getState}) => (next) => (action) => {
     return next(action);
 };
 // action - return new version of dispatch
-// dispatch - get current dispatch from store
+// dispatch(=next) - get current dispatch from store
 // store - used to get access to store's functions
 
 
@@ -24,12 +25,18 @@ const stringMiddleware = () => (next) => (action) => {
 }
 
 
+const store = createStore(
+	reducer,
+	applyMiddleware(thunkMiddleware, stringMiddleware, logMiddleware)
+);
 
 
-const store = createStore(reducer, applyMiddleware(stringMiddleware, logMiddleware));
+const delayedActionCreator = (timeout) => (dispatch) => {
+    setTimeout(() => dispatch({
+        type: 'DELAYED_ACTION'
+    }), timeout);
+}
 
-
-//testing stringEnhacer
-store.dispatch('HELLO_WORLD');
+store.dispatch(delayedActionCreator(3000));
 
 export default store;
