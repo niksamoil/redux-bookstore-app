@@ -1,38 +1,32 @@
-import { createStore, compose } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 
 import reducer from './reducers';
 
-// enhancer - imbunatațitor
-const logEnhancer = (createStore) => (...args) => {
-    const store = createStore(...args);
-    const originalDispatch = store.dispatch;
-    store.dispatch = (action) => {
-        console.log(action.type);
-        return originalDispatch(action);
+
+// middleware changes only dispatch method in object store, not all object (next === dispatch)
+const logMiddleware = ({getState}) => (next) => (action) => {
+    console.log(action.type, getState());
+    return next(action);
+};
+// action - return new version of dispatch
+// dispatch - get current dispatch from store
+// store - used to get access to store's functions
+
+
+const stringMiddleware = () => (next) => (action) => {
+    if( typeof action === 'string') {
+        return next({
+            type: action
+        });
     }
 
-    return store;
-};
+    return next(action);
+}
 
-const stringEnhancer = (createStore) => (...args) => {
-    const store = createStore(...args);
-    const originalDispatch = store.dispatch;
-    store.dispatch = (action) => {
 
-        //added 'string' support in dispatch
-        if( typeof action === 'string') {
-            return originalDispatch({
-                type: action
-            });
-        }
 
-        return originalDispatch(action);
-    }
 
-    return store;
-};
-
-const store = createStore(reducer, compose(stringEnhancer, logEnhancer));
+const store = createStore(reducer, applyMiddleware(stringMiddleware, logMiddleware));
 
 
 //testing stringEnhacer
